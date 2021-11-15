@@ -118,6 +118,9 @@ class CRM_Core_Page {
     'infoTitle',
     'infoType',
     'infoOptions',
+    // required for Summary.tpl (contact summary) but seems
+    // likely to be used more broadly to warrant inclusion here.
+    'context',
   ];
 
   /**
@@ -139,8 +142,12 @@ class CRM_Core_Page {
     if (!isset(self::$_template)) {
       self::$_template = CRM_Core_Smarty::singleton();
       self::$_session = CRM_Core_Session::singleton();
-      self::$_template->ensureVariablesAreAssigned($this->expectedSmartyVariables);
     }
+    // Smarty $_template is a static var which persists between tests, so
+    // if something calls clearTemplateVars(), the static still exists but
+    // our ensured variables get blown away, so we need to set them even if
+    // it's already been initialized.
+    self::$_template->ensureVariablesAreAssigned($this->expectedSmartyVariables);
 
     // FIXME - why are we messing with 'snippet'? Why not just pass it directly into $this->_print?
     if (!empty($_REQUEST['snippet'])) {
