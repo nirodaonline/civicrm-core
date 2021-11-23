@@ -1,4 +1,6 @@
 <?php
+// require_once('CiviTest/CiviUnitTestCase.php');
+
 
 /**
  *  Include dataProvider for tests
@@ -1364,6 +1366,35 @@ civicrm_relationship.is_active = 1 AND
     $this->assertCount(1, $rows);
     $this->assertEquals('John', $rows[0]['first_name']);
     $this->assertEquals('Smith', $rows[0]['last_name']);
+  }
+
+  /**
+   * Tests if a space is replaced by the wildcard on sort_name when operation is 'LIKE' and there is no comma
+   *
+   * CRM-22060 fix if condition 
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testReplaceSpaceByWildcardCondition() {
+    //Check for wildcard
+    $params = [
+      0 => [
+        0 => 'sort_name',
+        1 => 'LIKE',
+        2 => 'John Doe',
+        3 => 0,
+        4 => 1,
+      ],
+    ];
+    $query = new CRM_Contact_BAO_Query($params);
+    list($select, $from, $where) = $query->query();
+    $this->assertStringContainsString("contact_a.sort_name LIKE '%John%Doe%'", $where);
+
+    //Check for NO wildcard due to comma
+    $params[0][2] = 'Doe, John';
+    $query = new CRM_Contact_BAO_Query($params);
+    list($select, $from, $where) = $query->query();
+    $this->assertStringContainsString("contact_a.sort_name LIKE '%Doe, John%'", $where);    
   }
 
 }
