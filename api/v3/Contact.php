@@ -945,6 +945,10 @@ function civicrm_api3_contact_getquick($params) {
   else {
     $strSearch = "$name%";
   }
+  // Replace space to allow to search for full name
+  if ( strpos($strSearch, ',') === FALSE && strpos($strSearch, ' ') !== FALSE ){
+    $strSearch = str_replace(' ','%',$strSearch);
+  }
   $includeEmailFrom = $includeNickName = '';
   if ($config->includeNickNameInName) {
     $includeNickName = " OR nick_name LIKE '$strSearch'";
